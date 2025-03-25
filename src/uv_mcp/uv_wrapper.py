@@ -2,9 +2,9 @@ import subprocess
 import json
 import os
 import sys
+import uv
 from typing import List, Dict, Any, Optional, Tuple, Union
 import shlex
-from . import uv
 
 class UVError(Exception):
     """Base exception for UV command errors"""
@@ -40,11 +40,9 @@ def run_uv_command(command: List[str], capture_json: bool = False) -> Union[str,
     """
     try:
         uv_bin = uv.find_uv_bin()
-        full_command = [uv_bin] + command
+        full_command = [uv_bin]
         
-        # Add --format=json if capturing JSON output
-        if capture_json and "--format=json" not in command:
-            full_command.append("--format=json")
+        full_command.extend(command)
             
         result = subprocess.run(
             full_command,
@@ -73,15 +71,15 @@ def run_uv_command(command: List[str], capture_json: bool = False) -> Union[str,
 
 def list_installed_packages(json_format: bool = True) -> Union[List[Dict[str, Any]], str]:
     """List all installed packages"""
-    return run_uv_command(["pip", "list"], capture_json=json_format)
+    return run_uv_command(["pip", "list", "--format=json"])
 
 def get_outdated_packages(json_format: bool = True) -> Union[List[Dict[str, Any]], str]:
     """List outdated packages"""
-    return run_uv_command(["pip", "list", "--outdated"], capture_json=json_format)
+    return run_uv_command(["pip", "list", "--outdated", "--format=json"])
 
 def get_package_info(package_name: str, json_format: bool = True) -> Union[Dict[str, Any], str]:
     """Get detailed information about a package"""
-    return run_uv_command(["pip", "show", package_name], capture_json=json_format)
+    return run_uv_command(["pip", "show", package_name, "--format=json"])
 
 def install_package(package_name: str, version: Optional[str] = None) -> str:
     """Install a package using uv"""
@@ -109,62 +107,3 @@ def install_packages(packages: List[str | Tuple[str, str]]) -> str:
 def uninstall_package(package_name: str) -> str:
     """Uninstall a package using uv"""
     return run_uv_command(["pip", "uninstall", "--yes", package_name])
-
-def parse_requirements(file_path: str, json_format: bool = True) -> Union[Dict[str, Any], str]:
-    """Parse a requirements file"""
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Requirements file not found: {file_path}")
-    
-    return run_uv_command(["pip", "install", "--dry-run", "--report", "-r", file_path], 
-                         capture_json=json_format)
-
-def create_virtualenv(path: str, packages: Optional[List[str]] = None) -> str:
-    """Create a new virtual environment"""
-    command = ["venv", "create", path]
-    result = run_uv_command(command)
-    
-    # Install packages if specified
-    if packages and packages:
-        python_bin = os.path.join(path, "bin", "python") if sys.platform != "win32" else os.path.join(path, "Scripts", "python.exe")
-        
-        for package in packages:
-            subprocess.run([python_bin, "-m", "uv", "pip", "install", package], check=True)
-    
-    return result
-
-def compare_environments(env_path1: str, env_path2: str) -> Dict[str, Any]:
-    """Compare packages between two environments"""
-    # Get packages in first environment
-    python_bin1 = os.path.join(env_path1, "bin", "python") if sys.platform != "win32" else os.path.join(env_path1, "Scripts", "python.exe")
-    result1 = subprocess.run([python_bin1, "-m", "uv", "pip", "list", "--format=json"], 
-                           capture_output=True, text=True, check=True)
-    packages1 = json.loads(result1.stdout)
-    
-    # Get packages in second environment
-    python_bin2 = os.path.join(env_path2, "bin", "python") if sys.platform != "win32" else os.path.join(env_path2, "Scripts", "python.exe")
-    result2 = subprocess.run([python_bin2, "-m", "uv", "pip", "list", "--format=json"], 
-                           capture_output=True, text=True, check=True)
-    packages2 = json.loads(result2.stdout)
-    
-    # Convert to dictionaries for easier comparison
-    pkg_dict1 = {pkg["name"]: pkg["version"] for pkg in packages1}
-    pkg_dict2 = {pkg["name"]: pkg["version"] for pkg in packages2}
-    
-    # Find differences
-    only_in_env1 = [name for name in pkg_dict1 if name not in pkg_dict2]
-    only_in_env2 = [name for name in pkg_dict2 if name not in pkg_dict1]
-    
-    # Find version differences
-    version_differences = {}
-    for name in pkg_dict1:
-        if name in pkg_dict2 and pkg_dict1[name] != pkg_dict2[name]:
-            version_differences[name] = {
-                "env1": pkg_dict1[name],
-                "env2": pkg_dict2[name]
-            }
-    
-    return {
-        "only_in_env1": only_in_env1,
-        "only_in_env2": only_in_env2,
-        "version_differences": version_differences
-    } 

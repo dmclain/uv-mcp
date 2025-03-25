@@ -5,7 +5,6 @@ CLI entry point for uv-mcp.
 This module provides the main entry point for the uv-mcp tool.
 """
 
-import os
 import sys
 import argparse
 
@@ -44,7 +43,7 @@ def main():
         
         # Run the server
         print(f"Starting uv-mcp server...")
-        mcp.run(host=args.host, port=args.port, verbose=args.verbose)
+        mcp.run()
     except ImportError as e:
         print(f"Error importing server module: {e}", file=sys.stderr)
         sys.exit(1)

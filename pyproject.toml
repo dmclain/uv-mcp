@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Model Context Protocol (MCP) server for interacting with Python installations via uv"
 readme = "README.md"
 authors = [
-    {name = "uv-mcp Contributors", email = "example@example.com"}
+    {name = "uv-mcp Contributors", email = "dmclain@gmail.com"}
 ]
 license = {text = "MIT"}
 requires-python = ">=3.8"
@@ -29,8 +29,8 @@ dev = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/uv-mcp"
-"Bug Tracker" = "https://github.com/yourusername/uv-mcp/issues"
+"Homepage" = "https://github.com/dmclain/uv-mcp"
+"Bug Tracker" = "https://github.com/dmclain/uv-mcp/issues"
 
 [project.scripts]
 uv-mcp = "uv_mcp.cli:main"
