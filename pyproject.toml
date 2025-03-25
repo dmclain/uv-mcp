@@ -26,7 +26,7 @@ classifiers = [
 ]
 dependencies = [
     "mcp>=1.5.0",
-    "uv>=0.1.0",
+    "uv>=0.6.9",
 ]
 
 [project.optional-dependencies]
@@ -35,15 +35,11 @@ dev = [
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "isort>=5.0.0",
-    "mypy>=1.0.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/username/uv-mcp"
-"Bug Tracker" = "https://github.com/username/uv-mcp/issues"
-
-[project.scripts]
-uv-mcp = "uv_mcp.cli:main"
+"Homepage" = "https://github.com/dmclain/uv-mcp"
+"Bug Tracker" = "https://github.com/dmclain/uv-mcp/issues"
 
 [tool.black]
 line-length = 88
@@ -52,13 +48,6 @@ target-version = ["py38", "py39", "py310", "py311", "py312"]
 [tool.isort]
 profile = "black"
 line_length = 88
-
-[tool.mypy]
-python_version = "3.8"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,36 +1,5 @@
 # Implementation Plan for uv-mcp
 
-## Project Structure
-
-```
-uv-mcp/
-├── src/
-│   └── uv_mcp/
-│       ├── __init__.py
-│       ├── config.py
-│       ├── server.py
-│       ├── resources/
-│       │   ├── __init__.py
-│       │   ├── packages.py
-│       │   └── requirements.py
-│       ├── tools/
-│       │   ├── __init__.py
-│       │   ├── environment.py
-│       │   ├── packages.py
-│       │   └── virtualenv.py
-│       └── utils/
-│           ├── __init__.py
-│           ├── uv_wrapper.py
-│           └── exceptions.py
-├── tests/
-│   ├── conftest.py
-│   ├── test_resources.py
-│   └── test_tools.py
-├── pyproject.toml
-├── README.md
-└── PLAN.md
-```
-
 ## Core Components
 
 ### 1. uv Integration Layer
@@ -43,12 +12,8 @@ uv-mcp/
 #### Package Resources
 - [ ] Implement `packages://installed` resource
   - Returns list of all installed packages with versions
-  - Include metadata like install path, dependencies
 - [ ] Implement `packages://outdated` resource
   - Compare installed vs latest available versions
-- [ ] Implement `packages://{name}/info` resource
-  - Package metadata from PyPI
-  - Local installation details
 
 #### Requirements Resources
 - [ ] Implement `requirements://{path}` resource
