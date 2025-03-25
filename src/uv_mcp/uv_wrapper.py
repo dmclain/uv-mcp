@@ -4,7 +4,7 @@ import os
 import sys
 from typing import List, Dict, Any, Optional, Tuple, Union
 import shlex
-import uv
+from . import uv
 
 class UVError(Exception):
     """Base exception for UV command errors"""
@@ -38,10 +38,10 @@ def run_uv_command(command: List[str], capture_json: bool = False) -> Union[str,
         UVNotFoundError: If uv executable cannot be found
         UVCommandError: If command execution fails
     """
-    uv_bin = uv.find_uv_bin()
-    full_command = [uv_bin] + command
-    
     try:
+        uv_bin = uv.find_uv_bin()
+        full_command = [uv_bin] + command
+        
         # Add --format=json if capturing JSON output
         if capture_json and "--format=json" not in command:
             full_command.append("--format=json")
@@ -67,7 +67,7 @@ def run_uv_command(command: List[str], capture_json: bool = False) -> Union[str,
         return result.stdout
     
     except FileNotFoundError:
-        raise UVNotFoundError(f"UV executable not found at {uv_bin}")
+        raise UVNotFoundError(f"UV executable not found or could not be executed")
 
 # Specific wrappers for common uv operations
 

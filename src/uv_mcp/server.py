@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP, Context
 from typing import List, Dict, Any, Optional
-import uv_wrapper
+from . import uv_wrapper
 
 # Create uv-mcp server with dependencies
 mcp = FastMCP("uv-mcp", dependencies=["uv"])
@@ -104,7 +104,4 @@ def parse_requirements(file_path: str) -> List[Dict[str, str]]:
     if isinstance(result, dict) and "install" in result:
         return [{"name": pkg["name"], "version": pkg.get("version", "")} 
                 for pkg in result["install"]]
-    return [{"name": "error", "version": "Failed to parse requirements"}]
-
-if __name__ == "__main__":
-    mcp.run()
+    return [{"name": "error", "version": "Failed to parse requirements"}] 

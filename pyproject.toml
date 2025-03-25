@@ -5,41 +5,41 @@ build-backend = "hatchling.build"
 [project]
 name = "uv-mcp"
 version = "0.1.0"
-description = "A Model Context Protocol server for interacting with Python installations via uv"
+description = "Model Context Protocol (MCP) server for interacting with Python installations via uv"
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
-keywords = ["ai", "llm", "mcp", "uv", "python", "dependency", "package"]
 authors = [
-    {name = "uv-mcp Contributors"}
+    {name = "uv-mcp Contributors", email = "example@example.com"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.8"
+dependencies = [
+    "mcp>=0.1.0",
+    "uv>=0.1.0",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-dependencies = [
-    "mcp>=1.5.0",
-    "uv>=0.6.9",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "isort>=5.0.0",
+    "pytest",
+    "mypy",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/dmclain/uv-mcp"
-"Bug Tracker" = "https://github.com/dmclain/uv-mcp/issues"
+"Homepage" = "https://github.com/yourusername/uv-mcp"
+"Bug Tracker" = "https://github.com/yourusername/uv-mcp/issues"
+
+[project.scripts]
+uv-mcp = "uv_mcp.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uv_mcp"]
+
+[tool.hatch.build.sources]
+"src" = "src"
 
 [tool.black]
 line-length = 88
