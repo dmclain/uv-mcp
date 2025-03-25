@@ -94,6 +94,18 @@ def install_package(package_name: str, version: Optional[str] = None) -> str:
     
     return run_uv_command(command)
 
+def install_packages(packages: List[str | Tuple[str, str]]) -> str:
+    """Install a package using uv"""
+    command = ["pip", "install"]
+    
+    for package in packages:
+        if isinstance(package, str):
+            command.append(package)
+        elif isinstance(package, tuple):
+            command.append(f"{package[0]}=={package[1]}")
+    
+    return run_uv_command(command)
+
 def uninstall_package(package_name: str) -> str:
     """Uninstall a package using uv"""
     return run_uv_command(["pip", "uninstall", "--yes", package_name])

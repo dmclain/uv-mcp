@@ -1,5 +1,5 @@
-from mcp.server.fastmcp import FastMCP, Context
-from typing import List, Dict, Any, Optional
+from mcp.server.fastmcp import FastMCP
+from typing import List, Dict, Any, Optional, Tuple
 from . import uv_wrapper
 
 # Create uv-mcp server with dependencies
@@ -79,6 +79,11 @@ def compare_environments(env_path1: str, env_path2: str) -> Dict[str, Any]:
 def install_package(package_name: str, version: Optional[str] = None) -> str:
     """Install a package"""
     return uv_wrapper.install_package(package_name, version)
+
+@mcp.tool()
+def install_packages(packages: List[str | Tuple[str, str]]) -> str:
+    """Install multiple packages"""
+    return uv_wrapper.install_packages(packages)
 
 @mcp.tool()
 def create_virtualenv(path: str, packages: List[str] = None) -> str:
