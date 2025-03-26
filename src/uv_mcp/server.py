@@ -38,7 +38,7 @@ def get_package_info_resource(package_name: str) -> Dict[str, Any]:
         return f"Error retrieving info for {package_name}: {str(e)}"
 
 # Tools
-@mcp.tool("run", description="Run a python command or python script")
+@mcp.tool("uv_run", description="Run a python command or python script with proper environment")
 def run_command(command: List[str]) -> str:
     """Run a command or script"""
     try:
@@ -46,7 +46,7 @@ def run_command(command: List[str]) -> str:
     except Exception as e:
         return f"Error running command: {str(e)}"
 
-@mcp.tool("init", description="Create configuration for a new project")
+@mcp.tool("uv_init", description="Create configuration for a new python project")
 def init_project() -> str:
     """Create a new project"""
     try:
@@ -54,23 +54,23 @@ def init_project() -> str:
     except Exception as e:
         return f"Error initializing project: {str(e)}"
 
-@mcp.tool("add", description="Install and add dependencies to the project")
+@mcp.tool("uv_add", description="Install and add python dependencies to the project")
 def add_dependency(package_name: str, version: Optional[str] = None) -> str:
-    """Add dependencies to the project"""
+    """Add python dependencies to the project"""
     try:
         return uv_wrapper.run_uv_command(["add", package_name, version])
     except Exception as e:
         return f"Error adding dependency {package_name}: {str(e)}"
 
-@mcp.tool("remove", description="Remove dependencies from the project")
+@mcp.tool("uv_remove", description="Remove python dependencies from the project")
 def remove_dependency(package_name: str) -> str:
     """Remove dependencies from the project"""
     try:
-        return uv_wrapper.remove_dependency(package_name)
+        return uv_wrapper.run_uv_command(["remove", package_name])
     except Exception as e:
         return f"Error removing dependency {package_name}: {str(e)}"
 
-@mcp.tool("sync", description="Install all declared dependencies, uninstall anything not declared")
+@mcp.tool("uv_sync", description="Install all declared python dependencies, uninstall anything not declared")
 def sync_dependencies(dry_run: bool = False) -> str:
     """Install all declared dependencies, uninstall anything not declared"""
     try:
@@ -81,7 +81,7 @@ def sync_dependencies(dry_run: bool = False) -> str:
     except Exception as e:
         return f"Error syncing dependencies: {str(e)}"
 
-@mcp.tool("lock", description="Update the project's uv.lock file")
+@mcp.tool("uv_lock", description="Update the project's uv.lock file")
 def lock_dependencies() -> str:
     """Update the project's lockfile"""
     try:

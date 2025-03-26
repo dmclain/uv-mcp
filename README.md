@@ -29,12 +29,12 @@ uv-mcp implements the [Model Context Protocol](https://modelcontextprotocol.io) 
 
 ### Tools
 
-- `run(command: str[])` - Run a command or script
-- `init()` - Create a new project
-- `add(package_name: str, version: Optional[str])` - Add dependencies to the project
-- `remove(package_name: str)` - Remove dependencies from the project
-- `sync(dry_run: bool)` - Install all declared dependencies, uninstall anything not declared
-- `lock()` - Update the project's lockfile
+- `uv_run(command: str[])` - Run a command or script
+- `uv_init()` - Create a new project
+- `uv_add(package_name: str, version: Optional[str])` - Add dependencies to the project
+- `uv_remove(package_name: str)` - Remove dependencies from the project
+- `uv_sync(dry_run: bool)` - Install all declared dependencies, uninstall anything not declared
+- `uv_lock()` - Update the project's lockfile
 - `pip(command: str[])` - Run a pip command
 - `pip_install(package_name: str, version: Optional[str])` - Install a package using pip
 - `pip_uninstall(package_name: str)` - Uninstall a package using pip
