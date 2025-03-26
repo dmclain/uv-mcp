@@ -45,7 +45,7 @@ def get_package_info_resource(package_name: str) -> Dict[str, Any]:
 def run_command(command: List[str]) -> str:
     """Run a command or script"""
     try:
-        return uv_wrapper.run_uv_command(command)
+        return uv_wrapper.run_uv_command(["run"] + command)
     except Exception as e:
         return f"Error running command: {str(e)}"
 
