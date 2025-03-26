@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 from typing import List, Dict, Any, Optional, Tuple
-from uv_mcp.uv_wrapper import UVWrapper
+from uv_mcp.uv_wrapper import UVWrapper, spec
 import os
 
 # Get venv path from environment variable if set by CLI
@@ -10,24 +10,22 @@ venv_path = os.environ.get("UV_MCP_VENV_PATH")
 uv_wrapper = UVWrapper(venv_path)
 
 # Create uv-mcp server with dependencies
-mcp = FastMCP("uv-mcp", dependencies=["uv"])
+mcp = FastMCP("uv-mcp", dependencies=["uv"], instructions="Use this tool to manage all python dependencies. If you want pip, use pip through this tool.")
 
 # Resources
-@mcp.resource("python:packages://installed", name="Installed Python Packages", mime_type="application/json")
+@mcp.resource("python:packages://installed", name="List Installed Python Packages", mime_type="application/json")
 def get_installed_packages() -> List[Dict[str, Any]]:
     """List of all installed packages and versions"""
     try:
-        packages = uv_wrapper.list_installed_packages()
-        return packages
+        return uv_wrapper.run_uv_command(["pip", "list"])
     except Exception as e:
         return f"Error retrieving installed packages: {str(e)}"
 
-@mcp.resource("python:packages://outdated", name="Outdated Python Packages", mime_type="application/json")
+@mcp.resource("python:packages://outdated", name="List Outdated Python Packages", mime_type="application/json")
 def get_outdated_packages() -> List[Dict[str, Any]]:
     """List of installed packages with newer versions available"""
     try:
-        outdated = uv_wrapper.get_outdated_packages()
-        return outdated
+        return uv_wrapper.run_uv_command(["pip", "list", "--outdated"])
     except Exception as e:
         return f"Error retrieving outdated packages: {str(e)}"
 
@@ -35,13 +33,12 @@ def get_outdated_packages() -> List[Dict[str, Any]]:
 def get_package_info_resource(package_name: str) -> Dict[str, Any]:
     """Detailed information about a specific package"""
     try:
-        info = uv_wrapper.get_package_info(package_name)
-        return info
+        return uv_wrapper.run_uv_command(["pip", "show", package_name])
     except Exception as e:
         return f"Error retrieving info for {package_name}: {str(e)}"
 
 # Tools
-@mcp.tool("run")
+@mcp.tool("run", description="Run a python command or python script")
 def run_command(command: List[str]) -> str:
     """Run a command or script"""
     try:
@@ -49,7 +46,7 @@ def run_command(command: List[str]) -> str:
     except Exception as e:
         return f"Error running command: {str(e)}"
 
-@mcp.tool("init")
+@mcp.tool("init", description="Create configuration for a new project")
 def init_project() -> str:
     """Create a new project"""
     try:
@@ -57,15 +54,15 @@ def init_project() -> str:
     except Exception as e:
         return f"Error initializing project: {str(e)}"
 
-@mcp.tool("add")
+@mcp.tool("add", description="Install and add dependencies to the project")
 def add_dependency(package_name: str, version: Optional[str] = None) -> str:
     """Add dependencies to the project"""
     try:
-        return uv_wrapper.add_dependency(package_name, version)
+        return uv_wrapper.run_uv_command(["add", package_name, version])
     except Exception as e:
         return f"Error adding dependency {package_name}: {str(e)}"
 
-@mcp.tool("remove")
+@mcp.tool("remove", description="Remove dependencies from the project")
 def remove_dependency(package_name: str) -> str:
     """Remove dependencies from the project"""
     try:
@@ -73,7 +70,7 @@ def remove_dependency(package_name: str) -> str:
     except Exception as e:
         return f"Error removing dependency {package_name}: {str(e)}"
 
-@mcp.tool("sync")
+@mcp.tool("sync", description="Install all declared dependencies, uninstall anything not declared")
 def sync_dependencies(dry_run: bool = False) -> str:
     """Install all declared dependencies, uninstall anything not declared"""
     try:
@@ -84,7 +81,7 @@ def sync_dependencies(dry_run: bool = False) -> str:
     except Exception as e:
         return f"Error syncing dependencies: {str(e)}"
 
-@mcp.tool("lock")
+@mcp.tool("lock", description="Update the project's uv.lock file")
 def lock_dependencies() -> str:
     """Update the project's lockfile"""
     try:
@@ -92,7 +89,7 @@ def lock_dependencies() -> str:
     except Exception as e:
         return f"Error locking dependencies: {str(e)}"
 
-@mcp.tool("pip")
+@mcp.tool("pip", description="Run a pip command")
 def pip_command(command: List[str]) -> str:
     """Run a pip command"""
     try:
@@ -101,26 +98,26 @@ def pip_command(command: List[str]) -> str:
     except Exception as e:
         return f"Error running pip command: {str(e)}"
 
-@mcp.tool("pip_install")
+@mcp.tool("pip_install", description="Install a package using pip")
 def pip_install(package_name: str, version: Optional[str] = None) -> str:
     """Install a package using pip"""
     try:
-        return uv_wrapper.install_package(package_name, version)
+        return uv_wrapper.run_uv_command(["pip", "install", spec(package_name, version)])
     except Exception as e:
         return f"Error installing {package_name}: {str(e)}"
 
-@mcp.tool("pip_uninstall")
+@mcp.tool("pip_uninstall", description="Uninstall a package using pip")
 def pip_uninstall(package_name: str) -> str:
     """Uninstall a package using pip"""
     try:
-        return uv_wrapper.uninstall_package(package_name)
+        return uv_wrapper.run_uv_command(["pip", "uninstall", package_name])
     except Exception as e:
         return f"Error uninstalling {package_name}: {str(e)}"
 
-@mcp.tool("pip_list")
+@mcp.tool("pip_list", description="List all installed packages using pip")
 def pip_list() -> List[Dict[str, Any]]:
     """List all installed packages using pip"""
     try:
-        return uv_wrapper.list_installed_packages()
+        return uv_wrapper.run_uv_command(["pip", "list"])
     except Exception as e:
         return f"Error listing packages: {str(e)}"

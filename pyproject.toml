@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "uv-mcp"
-version = "0.1.0"
+version = "0.2.1"
 description = "Model Context Protocol (MCP) server for interacting with Python installations via uv"
 readme = "README.md"
 authors = [
