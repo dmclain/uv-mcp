@@ -5,6 +5,7 @@ import sys
 import uv
 from typing import List, Dict, Any, Optional, Tuple, Union
 import shlex
+import pathlib
 
 class UVError(Exception):
     """Base exception for UV command errors"""
@@ -23,87 +24,89 @@ class UVNotFoundError(UVError):
     """Exception raised when UV executable cannot be found"""
     pass
 
-def run_uv_command(command: List[str], capture_json: bool = False) -> Union[str, Dict[str, Any]]:
-    """
-    Run a uv command and return the output
-    
-    Args:
-        command: List of command arguments (without 'uv' prefix)
-        capture_json: If True, attempt to parse output as JSON
-    
-    Returns:
-        Command output as string or parsed JSON
-    
-    Raises:
-        UVNotFoundError: If uv executable cannot be found
-        UVCommandError: If command execution fails
-    """
-    try:
-        uv_bin = uv.find_uv_bin()
-        full_command = [uv_bin]
-        
-        full_command.extend(command)
-            
-        result = subprocess.run(
-            full_command,
-            capture_output=True,
-            text=True,
-            check=False  # We'll handle errors ourselves
-        )
-        
-        if result.returncode != 0:
-            cmd_str = ' '.join(shlex.quote(arg) for arg in full_command)
-            raise UVCommandError(cmd_str, result.returncode, result.stderr)
-        
-        if capture_json:
-            try:
-                return json.loads(result.stdout)
-            except json.JSONDecodeError:
-                # Fall back to returning raw output if JSON parsing fails
-                return result.stdout
-        
-        return result.stdout
-    
-    except FileNotFoundError:
-        raise UVNotFoundError(f"UV executable not found or could not be executed")
-
-# Specific wrappers for common uv operations
-
-def list_installed_packages(json_format: bool = True) -> Union[List[Dict[str, Any]], str]:
-    """List all installed packages"""
-    return run_uv_command(["pip", "list", "--format=json"])
-
-def get_outdated_packages(json_format: bool = True) -> Union[List[Dict[str, Any]], str]:
-    """List outdated packages"""
-    return run_uv_command(["pip", "list", "--outdated", "--format=json"])
-
-def get_package_info(package_name: str, json_format: bool = True) -> Union[Dict[str, Any], str]:
-    """Get detailed information about a package"""
-    return run_uv_command(["pip", "show", package_name, "--format=json"])
-
-def install_package(package_name: str, version: Optional[str] = None) -> str:
-    """Install a package using uv"""
-    command = ["pip", "install"]
-    
+def spec(package_name: str, version: Optional[str] = None) -> Tuple[str, Optional[str]]:
     if version:
-        command.append(f"{package_name}=={version}")
+        return f"{package_name}=={version}"
     else:
-        command.append(package_name)
-    
-    return run_uv_command(command)
+        return package_name
 
-def install_packages(packages: List[str | Tuple[str, str]]) -> str:
-    """Install a package using uv"""
-    command = ["pip", "install"]
+class UVWrapper:
+    """Wrapper class for UV CLI operations with virtual environment support"""
     
-    for package in packages:
-        if isinstance(package, str):
-            command.append(package)
-        elif isinstance(package, tuple):
-            command.append(f"{package[0]}=={package[1]}")
-    
-    return run_uv_command(command)
-
-def uninstall_package(package_name: str) -> str:
-    """Uninstall a package using uv"""
-    return run_uv_command(["pip", "uninstall", "--yes", package_name])
+    def __init__(self, venv_path: Optional[str] = None):
+        """
+        Initialize with optional virtual environment path
+        
+        Args:
+            venv_path: Path to virtual environment. If None, will look for .venv or venv
+        """
+        self.venv_path = self._resolve_venv_path(venv_path)
+        print(f"Using virtual environment: {self.venv_path}")
+        
+    def _resolve_venv_path(self, venv_path: Optional[str]) -> Optional[str]:
+        """
+        Resolve the virtual environment path
+        
+        If venv_path is provided, use it.
+        Otherwise, check if .venv or venv exists in the current directory.
+        
+        Returns:
+            The resolved path or None if no venv found
+        """
+        if venv_path:
+            path = pathlib.Path(venv_path)
+            if not path.exists():
+                print(f"Warning: Specified virtual environment path {venv_path} does not exist", file=sys.stderr)
+            return str(path.absolute())
+            
+        # Check for .venv or venv in current directory
+        for venv_dir in ['.venv', 'venv']:
+            path = pathlib.Path(venv_dir)
+            if path.exists() and path.is_dir():
+                return str(path.absolute())
+                
+        return None
+        
+    def run_uv_command(self, command: List[str]) -> Union[str, Dict[str, Any]]:
+        """
+        Run a uv command and return the output
+        
+        Args:
+            command: List of command arguments (without 'uv' prefix)
+        
+        Returns:
+            Command output as string or parsed JSON
+        
+        Raises:
+            UVNotFoundError: If uv executable cannot be found
+            UVCommandError: If command execution fails
+        """
+        try:
+            uv_bin = uv.find_uv_bin()
+            full_command = [uv_bin]
+            
+            full_command.extend(command)
+            
+            env = os.environ.copy()
+            
+            # If we have a venv path, add it to the command
+            if self.venv_path:
+                env["VIRTUAL_ENV"] = self.venv_path
+                env["PATH"] = os.path.join(self.venv_path, "bin") + os.pathsep + env["PATH"]
+                
+            result = subprocess.run(
+                full_command,
+                capture_output=True,
+                text=True,
+                check=False,  # We'll handle errors ourselves
+                env=env
+            )
+            
+            if result.returncode != 0:
+                cmd_str = ' '.join(shlex.quote(arg) for arg in full_command)
+                raise UVCommandError(cmd_str, result.returncode, result.stderr)
+            
+            return result.stdout
+        
+        except FileNotFoundError:
+            raise UVNotFoundError(f"UV executable not found or could not be executed")

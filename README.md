@@ -23,20 +23,22 @@ uv-mcp implements the [Model Context Protocol](https://modelcontextprotocol.io) 
 
 - `python:packages://installed` - List of all installed packages and versions
 - `python:packages://outdated` - List of installed packages with newer versions available
-- `python:packages://{package_name}/info` - Detailed information about a specific package
 - `python:packages://{package_name}/latest` - Latest versions available for a package
 - `python:packages://{package_name}/dependencies` - List of dependencies for a specific package
 - `python:requirements://{file_path}` - Parsed content of requirements files
 
 ### Tools
 
-- `list_packages()` - List all installed packages
-- `sync()` - Sync the current environment with the requirements file
-- `get_package_info(package_name: str)` - Get detailed info about a package
-- `check_package_installed(package_name: str)` - Check if a package is installed
-- `compare_environments()` - Compare two environments
-- `install_package(package_name: str, version: Optional[str])` - Install a package
-- `create_virtualenv(path: str, packages: List[str])` - Create a new virtual environment
+- `run(command: str[])` - Run a command or script
+- `init()` - Create a new project
+- `add(package_name: str, version: Optional[str])` - Add dependencies to the project
+- `remove(package_name: str)` - Remove dependencies from the project
+- `sync(dry_run: bool)` - Install all declared dependencies, uninstall anything not declared
+- `lock()` - Update the project's lockfile
+- `pip(command: str[])` - Run a pip command
+- `pip_install(package_name: str, version: Optional[str])` - Install a package using pip
+- `pip_uninstall(package_name: str)` - Uninstall a package using pip
+- `pip_list()` - List all installed packages using pip
 
 ## Usage
 
@@ -44,12 +46,6 @@ To start the server:
 
 ```bash
 uvx uv-mcp
-```
-
-In Claude Desktop or other MCP-compatible clients, you can install this server with:
-
-```bash
-mcp install uv-mcp
 ```
 
 ## Development

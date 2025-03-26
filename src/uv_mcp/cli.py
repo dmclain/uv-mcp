@@ -7,6 +7,7 @@ This module provides the main entry point for the uv-mcp tool.
 
 import sys
 import argparse
+import os
 
 def main():
     """
@@ -17,32 +18,24 @@ def main():
     parser = argparse.ArgumentParser(
         description="MCP server for interacting with Python installations via uv"
     )
+    
     parser.add_argument(
-        "--host", 
-        default="127.0.0.1",
-        help="Host to bind the server to (default: 127.0.0.1)"
-    )
-    parser.add_argument(
-        "--port", 
-        type=int, 
-        default=0,
-        help="Port to bind the server to (default: auto-select)"
-    )
-    parser.add_argument(
-        "--verbose", 
-        "-v", 
-        action="store_true",
-        help="Enable verbose logging"
+        "venv_path", 
+        nargs="?", 
+        help="Path to a virtual environment to use. If not provided, will check for .venv or venv directories"
     )
     
     args = parser.parse_args()
+    
+    # Set the virtualenv path as an environment variable to be picked up by the server
+    if args.venv_path:
+        os.environ["UV_MCP_VENV_PATH"] = args.venv_path
     
     # Import the server module
     try:
         from uv_mcp.server import mcp
         
         # Run the server
-        print(f"Starting uv-mcp server...")
         mcp.run()
     except ImportError as e:
         print(f"Error importing server module: {e}", file=sys.stderr)
